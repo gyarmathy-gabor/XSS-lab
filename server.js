@@ -129,7 +129,7 @@ app.get('/context-title', (req, res) => {
         return res.send(page({ body: nameForm() }));
     }
     res.send(page({
-        title: `Welcome, ${String(name).toUpperCase()}`,
+        title: `Welcome, ${name}`,
         body: `<div class="alert alert-success">
                     <p class="text-center">Thanks for entering your name</p>
                 </div>`
@@ -229,9 +229,11 @@ app.get('/content-type', (req, res) => {
                 </div>
             </div>
 <script>
-    $('.check').click( function(){
-        $.getJSON('/content-type/check.php?username=' + $('input[name="username"]').val(), function(resp){
-            alert( resp.msg );
+    document.addEventListener('DOMContentLoaded', function () {
+        $('.check').click( function(){
+            $.getJSON('/content-type/check.php?username=' + $('input[name="username"]').val(), function(resp){
+                alert( resp.msg );
+            });
         });
     });
 </script>`
