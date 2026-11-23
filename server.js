@@ -1,12 +1,24 @@
 const express = require('express');
+const fs = require('fs');
+const path = require('path');
+const multer = require('multer');
 const { page, nameForm, commentForm } = require('./views/layout');
 const { renderMarkdown } = require('./lib/markdown');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const UPLOAD_DIR = path.join(__dirname, 'uploads');
+const upload = multer({
+    storage: multer.diskStorage({
+        destination: (req, file, cb) => cb(null, UPLOAD_DIR),
+        filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
+    })
+});
+
 app.use('/css', express.static(__dirname + '/public/css'));
 app.use('/js', express.static(__dirname + '/public/js'));
+app.use('/uploads', express.static(UPLOAD_DIR));
 
 app.get('/', (req, res) => {
     res.send(page({
@@ -47,6 +59,7 @@ app.get('/', (req, res) => {
                     <h3>Stored</h3>
                     <ul>
                         <li><a href="/stored" target="_blank">Stored XSS</a></li>
+                        <li><a href="/upload" target="_blank">Image Upload Stored XSS</a></li>
                     </ul>
                     <h3>CSP (Content Security Policy)</h3>
                     <ul>
@@ -358,6 +371,43 @@ app.get('/stored', (req, res) => {
 })();
 </script>`
     }));
+});
+
+function uploadPage() {
+    const files = fs.readdirSync(UPLOAD_DIR).filter((f) => f !== '.gitkeep');
+    const list = files.length
+        ? `<ul>${files.map((f) => `<li><a href="/uploads/${f}" target="_blank">${f}</a></li>`).join('')}</ul>`
+        : '<p>No images uploaded yet.</p>';
+    return page({
+        body: `<div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Upload a profile picture</h3>
+                </div>
+                <div class="panel-body">
+                    <p>Only png, jpg and webp images are allowed.</p>
+                    <form method="post" action="/upload" enctype="multipart/form-data">
+                        <div><input type="file" name="image" accept="image/png,image/jpeg,image/webp"></div>
+                        <div style="margin-top:7px"><input type="submit" class="btn btn-success pull-right" value="Upload"></div>
+                    </form>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Uploaded Images</h3>
+                </div>
+                <div class="panel-body">
+                    ${list}
+                </div>
+            </div>`
+    });
+}
+
+app.get('/upload', (req, res) => {
+    res.send(uploadPage());
+});
+
+app.post('/upload', upload.single('image'), (req, res) => {
+    res.redirect('/upload');
 });
 
 function cspPage(name) {
