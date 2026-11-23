@@ -60,6 +60,8 @@ app.get('/', (req, res) => {
                     <ul>
                         <li><a href="/stored" target="_blank">Stored XSS</a></li>
                         <li><a href="/upload" target="_blank">Image Upload Stored XSS</a></li>
+                        <li><a href="/profile" target="_blank">Profile Edit Stored XSS</a></li>
+                        <li><a href="/profile2" target="_blank">Profile Edit Stored XSS 2</a></li>
                     </ul>
                     <h3>CSP (Content Security Policy)</h3>
                     <ul>
@@ -408,6 +410,177 @@ app.get('/upload', (req, res) => {
 
 app.post('/upload', upload.single('image'), (req, res) => {
     res.redirect('/upload');
+});
+
+app.get('/profile', (req, res) => {
+    res.send(page({
+        body: `<div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Edit Profile</h3>
+                </div>
+                <div class="panel-body">
+                    <form id="profileForm">
+                        <div><label>Name:</label></div>
+                        <div><input class="form-control" name="name" id="profileName"></div>
+                        <div><label>Website:</label></div>
+                        <div><input class="form-control" name="website" id="profileWebsite"></div>
+                        <div><label>Description:</label></div>
+                        <div><textarea class="form-control" name="description" id="profileDescription"></textarea></div>
+                        <div style="margin-top:7px"><input type="submit" class="btn btn-success pull-right" value="Save Profile"></div>
+                    </form>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Profile Preview</h3>
+                </div>
+                <div class="panel-body" id="profileView"></div>
+            </div>
+<script>
+(function () {
+    var KEY = 'xss-lab-profile';
+
+    function load() {
+        try {
+            return JSON.parse(localStorage.getItem(KEY)) || { name: '', website: '', description: '' };
+        } catch (e) {
+            return { name: '', website: '', description: '' };
+        }
+    }
+
+    function save(profile) {
+        localStorage.setItem(KEY, JSON.stringify(profile));
+    }
+
+    function render() {
+        var profile = load();
+        var view = document.getElementById('profileView');
+        view.innerHTML = '';
+
+        var name = document.createElement('h4');
+        name.textContent = profile.name;
+        view.appendChild(name);
+
+        var link = document.createElement('a');
+        link.setAttribute('href', profile.website);
+        link.textContent = 'Visit website';
+        view.appendChild(link);
+
+        var desc = document.createElement('p');
+        desc.textContent = profile.description;
+        view.appendChild(desc);
+
+        document.getElementById('profileName').value = profile.name;
+        document.getElementById('profileWebsite').value = profile.website;
+        document.getElementById('profileDescription').value = profile.description;
+    }
+
+    document.getElementById('profileForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        save({
+            name: document.getElementById('profileName').value,
+            website: document.getElementById('profileWebsite').value,
+            description: document.getElementById('profileDescription').value
+        });
+        render();
+    });
+
+    render();
+})();
+</script>`
+    }));
+});
+
+app.get('/profile2', (req, res) => {
+    res.send(page({
+        body: `<div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Edit Profile</h3>
+                </div>
+                <div class="panel-body">
+                    <form id="profileForm">
+                        <div><label>Name:</label></div>
+                        <div><input class="form-control" name="name" id="profileName"></div>
+                        <div><label>Website:</label></div>
+                        <div><input class="form-control" name="website" id="profileWebsite"></div>
+                        <div><label>Description:</label></div>
+                        <div><textarea class="form-control" name="description" id="profileDescription"></textarea></div>
+                        <div style="margin-top:7px"><input type="submit" class="btn btn-success pull-right" value="Save Profile"></div>
+                    </form>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Profile Preview</h3>
+                </div>
+                <div class="panel-body" id="profileView"></div>
+            </div>
+<script>
+(function () {
+    var KEY = 'xss-lab-profile-2';
+
+    function load() {
+        try {
+            return JSON.parse(localStorage.getItem(KEY)) || { name: '', website: '', description: '' };
+        } catch (e) {
+            return { name: '', website: '', description: '' };
+        }
+    }
+
+    function save(profile) {
+        localStorage.setItem(KEY, JSON.stringify(profile));
+    }
+
+    function sanitizeUrl(url) {
+        if (/^\\s*javascript:/i.test(url)) {
+            return '#';
+        }
+        return url;
+    }
+
+    function render() {
+        var profile = load();
+        var view = document.getElementById('profileView');
+        view.innerHTML = '';
+
+        var name = document.createElement('h4');
+        name.textContent = profile.name;
+        view.appendChild(name);
+
+        var label = document.createElement('div');
+        label.textContent = 'Website Preview:';
+        view.appendChild(label);
+
+        var preview = document.createElement('iframe');
+        preview.style.width = '100%';
+        preview.style.height = '150px';
+        preview.style.border = '1px solid #444';
+        preview.src = sanitizeUrl(profile.website);
+        view.appendChild(preview);
+
+        var desc = document.createElement('p');
+        desc.textContent = profile.description;
+        view.appendChild(desc);
+
+        document.getElementById('profileName').value = profile.name;
+        document.getElementById('profileWebsite').value = profile.website;
+        document.getElementById('profileDescription').value = profile.description;
+    }
+
+    document.getElementById('profileForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        save({
+            name: document.getElementById('profileName').value,
+            website: document.getElementById('profileWebsite').value,
+            description: document.getElementById('profileDescription').value
+        });
+        render();
+    });
+
+    render();
+})();
+</script>`
+    }));
 });
 
 function cspPage(name) {

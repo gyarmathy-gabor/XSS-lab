@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "express": "^4.19.2",
-    "multer": "^2.5.0"
+    "multer": "^2.5.0",
+    "pptxgenjs": "^4.0.1"
   }
 }
