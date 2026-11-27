@@ -163,13 +163,26 @@ app.get('/context-style', (req, res) => {
 });
 
 app.get('/exercise-1', (req, res) => {
-    const { name } = req.query;
-    if (name === undefined) {
-        return res.send(page({ body: nameForm() }));
+    const { imageurl } = req.query;
+    if (imageurl === undefined) {
+        return res.send(page({
+            body: `<div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Exercise 1</h3>
+                        </div>
+                        <div class="panel-body">
+                            <form method="GET">
+                                <div><label>Value:</label></div>
+                                <div><input class="form-control" name="imageurl"></div>
+                                <div style="margin-top:7px"><input type="submit" class="btn btn-success pull-right" value="Enter"></div>
+                            </form>
+                        </div>
+                    </div>`
+        }));
     }
     res.send(page({
         body: `<div class="alert alert-success">
-                    <p class="text-center"><img src="${name}" width="100"></p>
+                    <p class="text-center"><img src="${imageurl}" width="100"></p>
                 </div>`
     }));
 });
