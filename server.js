@@ -37,6 +37,7 @@ app.get('/', (req, res) => {
                         <li><a href="/context-textarea" target="_blank">Escaping Context: textarea</a></li>
                         <li><a href="/context-title" target="_blank">Escaping Context: title</a></li>
                         <li><a href="/context-style" target="_blank">Escaping Context: style</a></li>
+                        <li><a href="/exercise-1" target="_blank">Exercise 1</a></li>
                     </ul>
                     <h3>Filter Evasion</h3>
                     <ul>
@@ -158,6 +159,18 @@ app.get('/context-style', (req, res) => {
                     </form>
                 </div>
             </div>`
+    }));
+});
+
+app.get('/exercise-1', (req, res) => {
+    const { name } = req.query;
+    if (name === undefined) {
+        return res.send(page({ body: nameForm() }));
+    }
+    res.send(page({
+        body: `<div class="alert alert-success">
+                    <p class="text-center"><img src="${name}" width="100"></p>
+                </div>`
     }));
 });
 
